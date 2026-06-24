@@ -13,7 +13,23 @@ return new class extends Migration
     {
         Schema::create('raw_contents', function (Blueprint $table) {
             $table->id();
+
+            $table->foreignId('user_id')
+                ->constrained()
+                ->cascadeOnDelete();
+
+            $table->foreignId('campaign_blueprint_id')
+                ->constrained('campaign_blueprints')
+                ->cascadeOnDelete();
+
+            $table->longText('content');
+
+            $table->string('status', 30)->default('pending');
+
             $table->timestamps();
+
+            $table->index(['user_id', 'status']);
+            $table->index(['campaign_blueprint_id', 'created_at']);
         });
     }
 

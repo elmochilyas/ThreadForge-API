@@ -13,7 +13,25 @@ return new class extends Migration
     {
         Schema::create('generated_posts', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('raw_content_id')
+                ->unique()
+                ->constrained()
+                ->cascadeOnDelete();
+
+            $table->string('hook_propose' , 280);
+            $table->json('body_points');
+            $table->unsignedTinyInteger('technical_readability_score');
+            $table->json('suggested_hashtags');
+            $table->text('tone_compliance_justification');
+
+            $table->json('payload_brut')->nullable();
+
+            $table->string('status' , 30)->default('draft');
+
             $table->timestamps();
+
+            $table->index('status');
+            $table->index('created_at');
         });
     }
 
