@@ -18,7 +18,7 @@ return new class extends Migration
                 ->constrained()
                 ->cascadeOnDelete();
 
-            $table->string('hook_propose' , 280);
+            $table->string('hook_propose', 280);
             $table->json('body_points');
             $table->unsignedTinyInteger('technical_readability_score');
             $table->json('suggested_hashtags');
@@ -26,7 +26,7 @@ return new class extends Migration
 
             $table->json('payload_brut')->nullable();
 
-            $table->string('status' , 30)->default('draft');
+            $table->string('status', 30)->default('draft');
 
             $table->timestamps();
 
