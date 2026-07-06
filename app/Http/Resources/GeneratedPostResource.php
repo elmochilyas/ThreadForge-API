@@ -19,9 +19,9 @@ class GeneratedPostResource extends JsonResource
 
             'hook_propose' => $this->hook_propose,
             'body_points' => $this->body_points,
-            'technical_readability_score' => $this->tecnichal_readability_score,
+            'technical_readability_score' => $this->technical_readability_score,
             'suggested_hashtags' => $this->suggested_hashtags,
-            'tone_complience_justification' => $this->tone_compiance_justification,
+            'tone_compliance_justification' => $this->tone_compliance_justification,
 
             'status' => $this->status->value ?? $this->status,
 
@@ -29,7 +29,7 @@ class GeneratedPostResource extends JsonResource
                 $this->whenLoaded('rawContent')
             ),
 
-            'creted_at' => $this->created_at?->format('Y-m-d H:i:s'),
+            'created_at' => $this->created_at?->format('Y-m-d H:i:s'),
             'updated_at' => $this->updated_at?->format('Y-m-d H:i:s'),
         ];
     }

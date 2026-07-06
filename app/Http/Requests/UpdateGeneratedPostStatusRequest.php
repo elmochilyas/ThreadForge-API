@@ -26,13 +26,26 @@ class UpdateGeneratedPostStatusRequest extends FormRequest
     {
         return [
             'status' => [
-                'required' ,
-                'string' ,
+                'required',
+                'string',
                 Rule::in([
                     GeneratedPost::STATUS_DRAFT,
                     GeneratedPost::STATUS_ARCHIVED,
                     GeneratedPost::STATUS_POSTED,
                 ]),
+            ],
+        ];
+    }
+
+    /**
+     * @return array<string, array<string, mixed>>
+     */
+    public function bodyParameters(): array
+    {
+        return [
+            'status' => [
+                'description' => 'New lifecycle status. Allowed values: draft, archived, posted.',
+                'example' => 'posted',
             ],
         ];
     }
