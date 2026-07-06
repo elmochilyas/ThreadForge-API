@@ -23,8 +23,25 @@ class LoginRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'email' => ['required','email'],
-            'password' => ['required','string'],
+            'email' => ['required', 'email'],
+            'password' => ['required', 'string'],
+        ];
+    }
+
+    /**
+     * @return array<string, array<string, mixed>>
+     */
+    public function bodyParameters(): array
+    {
+        return [
+            'email' => [
+                'description' => 'Account email address.',
+                'example' => 'creator@example.com',
+            ],
+            'password' => [
+                'description' => 'Account password.',
+                'example' => 'password123',
+            ],
         ];
     }
 }
