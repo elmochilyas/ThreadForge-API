@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Enumd;
+namespace App;
 
 enum GeneratedPostStatus: string
 {
     case Draft = 'draft';
-    case Archifed = 'archived';
+    case Archived = 'archived';
     case Posted = 'posted';
 }

@@ -1,12 +1,11 @@
 <?php
 
-namespace App\Enums;
+namespace App;
 
 enum RawContentStatus: string
 {
-    case Pendimg = 'pending';
+    case Pending = 'pending';
     case Processing = 'processing';
-    case Compleated = 'compleated';
+    case Completed = 'completed';
     case Failed = 'failed';
-
 }

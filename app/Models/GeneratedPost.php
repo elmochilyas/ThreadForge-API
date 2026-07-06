@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\GeneratedPostStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -31,6 +32,7 @@ class GeneratedPost extends Model
             'suggested_hashtags' => 'array',
             'payload_brut' => 'array',
             'technical_readability_score' => 'integer',
+            'status' => GeneratedPostStatus::class,
         ];
     }
 

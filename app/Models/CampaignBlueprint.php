@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
 class CampaignBlueprint extends Model
 {
@@ -33,5 +34,10 @@ class CampaignBlueprint extends Model
     public function rawContents(): HasMany
     {
         return $this->hasMany(RawContent::class);
+    }
+
+    public function generatedPosts(): HasManyThrough
+    {
+        return $this->hasManyThrough(GeneratedPost::class, RawContent::class);
     }
 }
