@@ -18,11 +18,11 @@ class RawContentResource extends JsonResource
             'id' => $this->id,
             'content' => $this->content,
             'status' => $this->status?->value ?? $this->status,
-            
+
             'campaign_blueprint' => new CampaignBlueprintResource(
                 $this->whenLoaded('campaignBlueprint')
             ),
-            
+
             'generated_post' => new GeneratedPostResource(
                 $this->whenLoaded('generatedPost')
             ),

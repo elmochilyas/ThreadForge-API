@@ -13,7 +13,7 @@ class RepurposeContentRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -24,18 +24,35 @@ class RepurposeContentRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'campain_blueprint_id' => [
+            'campaign_blueprint_id' => [
                 'required',
-                'integer' ,
-                Rule::exists('campaign_blueprints','id')
-                    ->where('user_id' , $this->user()?->id),
+                'integer',
+                Rule::exists('campaign_blueprints', 'id')
+                    ->where('user_id', $this->user()?->id),
             ],
 
             'content' => [
                 'required',
-                'string' ,
-                'min:20' ,
-                'max:20000' ,
+                'string',
+                'min:20',
+                'max:20000',
+            ],
+        ];
+    }
+
+    /**
+     * @return array<string, array<string, mixed>>
+     */
+    public function bodyParameters(): array
+    {
+        return [
+            'campaign_blueprint_id' => [
+                'description' => 'Campaign blueprint id owned by the authenticated user.',
+                'example' => 1,
+            ],
+            'content' => [
+                'description' => 'Raw developer notes, markdown, or experience report to transform.',
+                'example' => 'Today I refactored a queue worker and learned that idempotency matters more than retries.',
             ],
         ];
     }
