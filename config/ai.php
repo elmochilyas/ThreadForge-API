@@ -38,6 +38,15 @@ return [
         ],
     ],
 
+    'conversations' => [
+        'generate_title' => env('AI_CONVERSATIONS_GENERATE_TITLE', false),
+        'connection' => env('AI_CONVERSATIONS_CONNECTION'),
+        'tables' => [
+            'conversations' => env('AI_CONVERSATIONS_TABLE', 'agent_conversations'),
+            'messages' => env('AI_CONVERSATION_MESSAGES_TABLE', 'agent_conversation_messages'),
+        ],
+    ],
+
     /*
     |--------------------------------------------------------------------------
     | AI Providers
@@ -139,6 +148,7 @@ return [
         'xai' => [
             'driver' => 'xai',
             'key' => env('XAI_API_KEY'),
+            'url' => env('XAI_URL', 'https://api.x.ai/v1'),
         ],
     ],
 
