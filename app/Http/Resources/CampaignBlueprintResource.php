@@ -19,10 +19,11 @@ class CampaignBlueprintResource extends JsonResource
             'name' => $this->name,
             'tone' => $this->tone,
             'max_hashtags' => $this->max_hashtags,
-            'max_characters' => $this->max_caracters,
+            'max_characters' => $this->max_characters,
             'additional_rules' => $this->additional_rules,
 
             'raw_contents_count' => $this->whenCounted('rawContents'),
+            'generated_posts_count' => $this->whenCounted('generatedPosts'),
             'created_at' => $this->created_at?->format('Y-m-d H:i:s'),
             'updated_at' => $this->updated_at?->format('Y-m-d H:i:s'),
         ];
