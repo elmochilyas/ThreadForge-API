@@ -1,123 +1,159 @@
 # ThreadForge API
 
-ThreadForge is a headless Laravel API for turning raw developer notes into X posts. It stores reusable writing rules as campaign blueprints, queues AI generation work, persists structured output, and exposes a remembered ghostwriter chat assistant with real PHP tools for database context.
+<p>
+  <img src="https://img.shields.io/badge/PHP-8.4-777BB4?style=flat-square&logo=php" alt="PHP 8.4"/>
+  <img src="https://img.shields.io/badge/Laravel-13-F05340?style=flat-square&logo=laravel" alt="Laravel 13"/>
+  <img src="https://img.shields.io/badge/Pest-4.7-1B1B2F?style=flat-square" alt="Pest 4.7"/>
+  <img src="https://img.shields.io/badge/MySQL-4479A1?style=flat-square&logo=mysql" alt="MySQL"/>
+  <img src="https://img.shields.io/badge/Azure-0078D4?style=flat-square&logo=microsoftazure" alt="Azure"/>
+</p>
 
-## Stack
+Headless Laravel API that transforms raw developer notes into polished X posts.  
+Stores reusable writing rules as campaign blueprints, queues AI generation work via Laravel AI, and exposes a ghostwriter chat assistant with real database tool access.
 
-- Laravel 13, PHP 8.3
-- Laravel Sanctum Bearer tokens
-- Laravel Queues with the database driver
-- `laravel/ai` structured agents, tools, and conversation memory
-- xAI/Grok by default through the SDK `xai` provider
-- Scribe API documentation
+**Production URL:** [http://104.214.178.76](http://104.214.178.76)
 
-## Setup
+---
+
+## Features
+
+- **Authentication** – Sanctum bearer-token auth (register, login, logout)
+- **Campaign Blueprints** – Full CRUD for reusable writing-style rules
+- **Async AI Content Pipeline** – Submit raw content, receive `202 Accepted`, queued job generates posts via xAI/Grok
+- **Generated Posts** – Browse, filter, update status (draft → archived → posted)
+- **Ghostwriter Assistant** – AI chat agent per post with database tool access (`getCampaignRules`, `getPostHistory`)
+- **Structured AI Contract** – Strict JSON schema validation before persistence
+- **Database Queue** – Jobs processed through the `database` driver
+
+---
+
+## Tech Stack
+
+| Layer         | Technology                             |
+|---------------|----------------------------------------|
+| Framework     | Laravel 13                             |
+| Language      | PHP 8.4                                |
+| Database      | MySQL (production), SQLite (testing)   |
+| Auth          | Laravel Sanctum (Bearer tokens)        |
+| Queues        | Laravel Queues with `database` driver  |
+| AI            | `laravel/ai` – structured agents, tools, conversation memory |
+| AI Provider   | xAI/Grok via `xai` SDK                 |
+| API Docs      | Scribe (`knuckleswtf/scribe`)          |
+| Testing       | Pest PHP 4.7                           |
+| CI            | GitHub Actions (`ubuntu-latest`)       |
+| Deployment    | Azure VM (Ubuntu 24.04, Nginx)         |
+
+---
+
+## Local Installation
 
 ```bash
+# 1. Clone and install dependencies
 composer install
+
+# 2. Environment setup
 cp .env.example .env
 php artisan key:generate
+
+# 3. Database and queued jobs table
 php artisan migrate
-```
+php artisan queue:table
+php artisan migrate
 
-Configure AI credentials:
-
-```env
+# 4. Configure AI credentials in .env
 XAI_API_KEY=your-key
 THREADFORGE_AI_PROVIDER=xai
 THREADFORGE_AI_MODEL=grok-4-1-fast-reasoning
 QUEUE_CONNECTION=database
 ```
 
-Run the API and queue worker:
+Run everything (server, queue worker, logs, Vite):
 
 ```bash
-php artisan serve
-php artisan queue:work
+composer run dev
 ```
 
-## Main Endpoints
+---
+
+## API Overview
 
 All protected endpoints require `Authorization: Bearer <token>`.
 
-- `POST /api/register`
-- `POST /api/login`
-- `POST /api/logout`
-- `GET /api/me`
-- `GET|POST /api/campaign-blueprints`
-- `GET|PATCH|DELETE /api/campaign-blueprints/{campaign_blueprint}`
-- `POST /api/content/repurpose`
-- `GET /api/raw-contents`
-- `GET /api/raw-contents/{rawContent}`
-- `GET /api/generated-posts`
-- `GET /api/generated-posts/{generatedPost}`
-- `PATCH /api/generated-posts/{generatedPost}/status`
-- `POST /api/generated-posts/{generatedPost}/chat`
+### Public Auth
 
-`POST /api/content/repurpose` returns `202 Accepted` immediately and dispatches `ProcessRawContentJob`. The job calls `PostGenerationAgent`, validates the exact structured schema, and stores JSON columns through Eloquent casts.
+| Method | Endpoint        | Description       |
+|--------|-----------------|-------------------|
+| POST   | `/api/register` | Create an account |
+| POST   | `/api/login`    | Get a token       |
 
-## Structured AI Contract
+### Protected Routes
 
-The generation agent requires this payload before persistence:
+| Method   | Endpoint                                                 | Description                              |
+|----------|----------------------------------------------------------|------------------------------------------|
+| POST     | `/api/logout`                                            | Revoke token                             |
+| GET      | `/api/me`                                                | Current user                             |
+| GET      | `/api/campaign-blueprints`                               | List all blueprints                      |
+| POST     | `/api/campaign-blueprints`                               | Create a blueprint                       |
+| GET      | `/api/campaign-blueprints/{id}`                          | View a blueprint                         |
+| PATCH    | `/api/campaign-blueprints/{id}`                          | Update a blueprint                       |
+| DELETE   | `/api/campaign-blueprints/{id}`                          | Delete a blueprint                       |
+| POST     | `/api/content/repurpose`                                 | Submit content → `202 Accepted`, queued  |
+| GET      | `/api/raw-contents`                                      | List raw content                         |
+| GET      | `/api/raw-contents/{id}`                                 | View raw content                         |
+| GET      | `/api/generated-posts`                                   | List generated posts                     |
+| GET      | `/api/generated-posts/{id}`                              | View a generated post                    |
+| PATCH    | `/api/generated-posts/{id}/status`                       | Update post status                       |
+| POST     | `/api/generated-posts/{id}/chat`                         | Ghostwriter chat                         |
 
-```json
-{
-  "hook_propose": "string",
-  "body_points": ["string"],
-  "technicalreadabilityscore": 88,
-  "suggested_hashtags": ["#Laravel"],
-  "tonecompliancejustification": "string"
-}
-```
+The content pipeline works asynchronously: `POST /api/content/repurpose` immediately returns `202 Accepted` and dispatches `ProcessRawContentJob`. The job invokes `PostGenerationAgent`, validates against a strict schema, and persists structured JSON columns through Eloquent casts.
 
-The database stores the values as `hook_propose`, `body_points`, `technical_readability_score`, `suggested_hashtags`, and `tone_compliance_justification`.
+---
 
-## Ghostwriter Assistant
-
-`POST /api/generated-posts/{generatedPost}/chat` starts a remembered conversation and returns `conversation_id`. Send that id in later chat requests to continue the same memory state.
-
-The assistant has two real Laravel AI tools:
-
-- `getCampaignRules(int campaignId)`
-- `getPostHistory(int postId)`
-
-The tools enforce ownership and read the database instead of relying on prompt-only context.
-
-## Documentation
-
-Generate and open Scribe docs:
-
-```bash
-php artisan scribe:generate
-php artisan serve
-```
-
-Docs are available at `/docs`, with OpenAPI at `/docs.openapi` and Postman collection at `/docs.postman`.
-
-## Tests
+## Testing
 
 ```bash
 php artisan test
 ```
 
-The feature tests fake Laravel AI responses, so no external API key is needed for CI or local verification.
+Feature tests fake Laravel AI responses, so no external API key is needed for CI or local verification.
 
-## MCD
+---
 
-- User owns many CampaignBlueprint records.
-- User owns many RawContent records.
-- CampaignBlueprint owns many RawContent records.
-- RawContent has one GeneratedPost.
-- User owns many AI conversations through the Laravel AI SDK tables.
-- AI conversation has many AI conversation messages.
+## CI/CD
 
-## MLD
+**GitHub Actions** runs on every push and pull request (`ubuntu-latest`, PHP 8.4):
 
-- `users(id, name, email, password, timestamps)`
-- `campaign_blueprints(id, user_id, name, tone, max_hashtags, max_characters, additional_rules, timestamps)`
-- `raw_contents(id, user_id, campaign_blueprint_id, content, status, timestamps)`
-- `generated_posts(id, raw_content_id, hook_propose, body_points JSON, technical_readability_score, suggested_hashtags JSON, tone_compliance_justification, payload_brut JSON, status, timestamps)`
-- `agent_conversations(id UUID, user_id, title, timestamps)`
-- `agent_conversation_messages(id UUID, conversation_id, user_id, agent, role, content, attachments, tool_calls, tool_results, usage, meta, timestamps)`
-- `personal_access_tokens(...)`
-- `jobs(...)`
+1. Checkout repository
+2. Setup PHP with `sqlite` and `pdo_sqlite` extensions
+3. Copy `.env.example` → `.env`, install Composer dependencies
+4. Generate application key, prepare SQLite database
+5. Run `php artisan test`
+
+The workflow is defined in `.github/workflows/ci.yml`.
+
+---
+
+## Production Deployment
+
+- **URL:** [http://104.214.178.76](http://104.214.178.76)
+- **Server:** Azure VM, Ubuntu 24.04
+- **Stack:** PHP 8.4, MySQL, Nginx, Composer
+- **Path:** `/var/www/threadforge-api`
+- **Database:** `threadforge` (MySQL)
+
+Migrations were executed with `php artisan migrate --force`.
+
+> **Security:** `.env` is not committed to the repository. `APP_DEBUG=false` in production.  
+> **Queue:** The `database` queue driver is configured. A supervisor (e.g., Supervisor) must monitor the queue worker in production to process jobs continuously.
+
+---
+
+## Generated API Documentation
+
+```bash
+php artisan scribe:generate
+```
+
+- **HTML docs:** `/docs`  
+- **OpenAPI spec:** `/docs.openapi`  
+- **Postman collection:** `/docs.postman`
